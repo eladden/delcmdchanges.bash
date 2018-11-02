@@ -82,6 +82,12 @@ fi
 INFILE="$1"
 OUTFILE="$2"
 
+if [ "$INFILE" = "$OUTFILE" ]; then
+    echo same !
+    SAMEFILE=1
+    OUTFILE="$(basename -s .tex $INFILE)_tmp.tex"
+fi
+
 rm -f "${OUTFILE}"
 touch "${OUTFILE}"
 
@@ -104,23 +110,23 @@ END {
         replaced = 0
     while (!found && (c = getc()) != EOT) { # parsing commands
         buf0 = buf0 c
-        if( match(buf0, /\\added[[:space:]]*\[[^\]]*\][[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-        match(buf0, /\\added[[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-        match(buf0, /\\added[[:space:]]*{/) ) { # found command \added[<authorid>][<remark>]{<new text>}
+        if( match(buf0, /\\added[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+        match(buf0, /\\added[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+        match(buf0, /\\added[ \t\r\n\v\f]*{/) ) { # found command \added[<authorid>][<remark>]{<new text>}
         added = 1
                 found = 1
         balance = 1
         } else
-        if( match(buf0, /\\deleted[[:space:]]*\[[^\]]*\][[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-            match(buf0, /\\deleted[[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-            match(buf0, /\\deleted[[:space:]]*{/) ) { # found command \deleted[<authorid>][<remark>]{<deleted text>}
+        if( match(buf0, /\\deleted[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+            match(buf0, /\\deleted[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+            match(buf0, /\\deleted[ \t\r\n\v\f]*{/) ) { # found command \deleted[<authorid>][<remark>]{<deleted text>}
             deleted = 1
             found = 1
             balance = 1
         } else
-            if( match(buf0, /\\replaced[[:space:]]*\[[^\]]*\][[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-            match(buf0, /\\replaced[[:space:]]*\[[^\]]*\][[:space:]]*{/) ||
-            match(buf0, /\\replaced[[:space:]]*{/) ) { # found command \replaced[<authorid>][<remark>]{<new text>}{<old text>}
+            if( match(buf0, /\\replaced[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+            match(buf0, /\\replaced[ \t\r\n\v\f]*\[[^\]]*\][ \t\r\n\v\f]*{/) ||
+            match(buf0, /\\replaced[ \t\r\n\v\f]*{/) ) { # found command \replaced[<authorid>][<remark>]{<new text>}{<old text>}
             replaced = 1
             found = 1
                         balance = 1
@@ -187,7 +193,7 @@ END {
             skip=0
             while ( !skip && (c = getc()) != EOT ) { # skip first curly brace "{"
             buf = buf c
-            if ( c !~ /[[:space:]]/ )
+            if ( c !~ /[ \t\r\n\v\f]/ )
                 skip = 1
             }
             cmd = cmd buf # the command
@@ -246,4 +252,9 @@ function getc()
     balance = 0
     return c
 } '  "${INFILE}" 
+
+if [ $SAMEFILE = "1" ]; then
+   rm $INFILE
+   mv $OUTFILE $INFILE
+fi
 
