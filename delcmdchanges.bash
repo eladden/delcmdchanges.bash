@@ -81,6 +81,7 @@ fi
 
 INFILE="$1"
 OUTFILE="$2"
+SAMEFILE=0
 
 if [ "$INFILE" = "$OUTFILE" ]; then
     echo same !
